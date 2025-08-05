@@ -10,6 +10,12 @@ Comprehensive guide on how to test the MCP server with different clients and sce
 ### [🚀 Ready to Test](READY_TO_TEST.md)  
 Quick start guide showing the server is ready and how to connect from various clients.
 
+### [🔧 MCP Configuration Guide](MCP_CONFIG_GUIDE.md)
+Complete guide for configuring MCP clients (VS Code, Claude Desktop, etc.)
+
+### [📦 Deployment Guide](DEPLOYMENT_GUIDE.md)
+Choose between lazy loading and persistent service deployment options.
+
 ## 📖 Additional Resources
 
 ### Project Structure

@@ -135,11 +135,7 @@ out/
 !tests/*.js
 !scripts/*.js
 
-# Project structure documentation (generated)
-PROJECT_STRUCTURE.md
-
 # IDE and editor files
-.vscode/
 .idea/
 *.swp
 *.swo
