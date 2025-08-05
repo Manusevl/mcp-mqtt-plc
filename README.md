@@ -51,18 +51,22 @@ MQTT_PLC_COMMANDS_TOPIC=plc/commands
 ## Installation
 
 1. Clone the repository:
-   ```
-   git clone <repository-url>
+   ```bash
+   git clone https://github.com/yourusername/mcp-mqtt-plc-llm-server.git
    ```
 2. Navigate to the project directory:
-   ```
+   ```bash
    cd mcp-mqtt-plc-llm-server
    ```
 3. Install dependencies:
-   ```
+   ```bash
    npm install
    ```
-4. Configure your MQTT settings in `.env` file
+4. Copy the example environment file and configure your MQTT settings:
+   ```bash
+   cp .env.example .env
+   ```
+   Then edit `.env` with your actual MQTT broker settings.
 
 ## Usage
 
