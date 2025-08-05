@@ -5,11 +5,24 @@
   "description": "MCP server for MQTT-PLC communication",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p build/tsconfig.json",
     "start": "node dist/server.js",
-    "dev": "tsc && node dist/server.js",
-    "watch": "tsc --watch",
-    "test-mqtt": "tsc && node test-mqtt.js"
+    "start-lazy": "node dist/server-lazy.js",
+    "dev": "tsc -p build/tsconfig.json && node dist/server.js",
+    "watch": "tsc -p build/tsconfig.json --watch",
+    "test-mqtt": "tsc -p build/tsconfig.json && node tests/test-mqtt.js",
+    "test": "node tests/complete-test.js",
+    "test-client": "node tests/proper-test-client.js",
+    "mock-plc": "node tests/mock-plc.js",
+    "setup": "node scripts/setup.js",
+    "dev-helper": "node scripts/dev.js",
+    "clean": "node scripts/dev.js clean",
+    "check": "node scripts/dev.js check",
+    "service:start": "node scripts/mqtt-service.js start",
+    "service:stop": "node scripts/mqtt-service.js stop",
+    "service:status": "node scripts/mqtt-service.js status",
+    "service:restart": "node scripts/mqtt-service.js restart",
+    "service:logs": "node scripts/mqtt-service.js logs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",

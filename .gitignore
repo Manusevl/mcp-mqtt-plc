@@ -125,14 +125,18 @@ dist
 
 # Build output directories
 dist/
-build/
+build/out/
 out/
 
 # TypeScript compiled output
 *.js
 *.js.map
 *.d.ts
-!test-mqtt.js
+!tests/*.js
+!scripts/*.js
+
+# Project structure documentation (generated)
+PROJECT_STRUCTURE.md
 
 # IDE and editor files
 .vscode/

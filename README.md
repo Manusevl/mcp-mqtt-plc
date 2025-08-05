@@ -6,16 +6,33 @@ This project is an MCP (Model Context Protocol) server that connects to an MQTT 
 
 ```
 mcp-mqtt-plc-llm-server
-├── src
+├── src/                   # Source code
 │   ├── server.ts          # Main MCP server implementation
-│   ├── mqtt
-│   │   └── mqttClient.ts  # MQTT client for PLC communication
-│   └── types
-│       └── index.ts       # Type definitions for PLC data and MQTT
-├── .env                   # Environment configuration
-├── package.json           # npm configuration file
-├── tsconfig.json          # TypeScript configuration file
-└── README.md             # Project documentation
+│   ├── mqtt/              # MQTT client for PLC communication
+│   │   └── mqttClient.ts
+│   └── types/             # Type definitions for PLC data and MQTT
+│       └── index.ts
+├── tests/                 # Test files and utilities
+│   ├── test-mqtt.js       # MQTT connection test
+│   ├── complete-test.js   # Full MCP server test suite
+│   ├── mock-plc.js        # Mock PLC simulator for testing
+│   └── ...                # Additional test utilities
+├── docs/                  # Documentation
+│   ├── README.md          # Documentation index
+│   ├── TESTING_GUIDE.md   # Comprehensive testing guide
+│   └── READY_TO_TEST.md   # Quick start guide
+├── configs/               # Configuration files
+│   ├── .env.example       # Environment template
+│   ├── .env.test          # Test environment settings
+│   └── claude-desktop-config.json  # Claude Desktop integration
+├── scripts/               # Utility scripts
+│   ├── setup.js           # Project initialization
+│   └── dev.js             # Development helpers
+├── dist/                  # Built JavaScript files (generated)
+├── .env                   # Environment configuration (create from example)
+├── package.json           # npm configuration
+├── tsconfig.json          # TypeScript configuration
+└── README.md              # This file
 ```
 
 ## Features
@@ -48,37 +65,47 @@ MQTT_PLC_COMMANDS_TOPIC=plc/commands
 - AWS IoT Core: `mqtts://your-endpoint.iot.region.amazonaws.com:8883`
 - Any MQTT 3.1.1 compatible broker
 
-## Installation
+## Installation & Quick Start
 
-1. Clone the repository:
+1. **Clone and setup:**
    ```bash
    git clone https://github.com/yourusername/mcp-mqtt-plc-llm-server.git
-   ```
-2. Navigate to the project directory:
-   ```bash
    cd mcp-mqtt-plc-llm-server
-   ```
-3. Install dependencies:
-   ```bash
    npm install
    ```
-4. Copy the example environment file and configure your MQTT settings:
+
+2. **Initialize configuration:**
    ```bash
-   cp .env.example .env
+   npm run setup
    ```
-   Then edit `.env` with your actual MQTT broker settings.
+   This creates your `.env` file from the template in `configs/`.
 
-## Usage
-
-1. Build the project:
+3. **Configure MQTT settings:**
+   Edit `.env` with your MQTT broker details:
+   ```env
+   MQTT_BROKER_URL=mqtt://your-broker:1883
+   MQTT_CLIENT_ID=mcp-plc-server
+   MQTT_USERNAME=your-username
+   MQTT_PASSWORD=your-password
+   MQTT_PLC_DATA_TOPIC=plc/data
+   MQTT_PLC_COMMANDS_TOPIC=plc/commands
    ```
+
+4. **Build and start:**
+   ```bash
    npm run build
-   ```
-
-2. Start the server:
-   ```
    npm start
    ```
+
+## Quick Commands
+
+- `npm run setup` - Initialize project configuration
+- `npm run build` - Build TypeScript to JavaScript  
+- `npm run start` - Start the MCP server
+- `npm run test` - Run complete test suite
+- `npm run test-mqtt` - Test MQTT connection only
+- `npm run mock-plc` - Start mock PLC for testing
+- `npm run check` - Check project health
 
 The server will automatically connect to your MQTT broker and start listening for PLC data on the configured topic.
 
