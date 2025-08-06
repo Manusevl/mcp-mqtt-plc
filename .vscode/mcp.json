@@ -1,14 +1,14 @@
 {
   "servers": {
     "mcp-mqtt-plc": {
-      "command": "node",
-      "args": ["C:\\projects\\X20MCPServer\\mcp-mqtt-plc-llm-server\\dist\\server.js"],
+      "command": "mcp-mqtt-plc",
+      "args": [],
       "env": {
-        "MQTT_BROKER_URL": "mqtt://192.168.1.1:1883",
-        "MQTT_CLIENT_ID": "mcp-plc-server",
-        "MQTT_USERNAME": "x20edgemqtt",
-        "MQTT_PASSWORD": "x20edgemqtt",
-        "MQTT_PLC_DATA_TOPIC": "PLCInfo",
+        "MQTT_BROKER_URL": "mqtt://your-broker:1883",
+        "MQTT_CLIENT_ID": "vscode-mcp-client",
+        "MQTT_USERNAME": "your-username",
+        "MQTT_PASSWORD": "your-password",
+        "MQTT_PLC_DATA_TOPIC": "plc/data",
         "MQTT_PLC_COMMANDS_TOPIC": "plc/commands"
       }
     }

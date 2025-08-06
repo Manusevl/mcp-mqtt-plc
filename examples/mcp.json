@@ -1,7 +1,0 @@
-{
-  "servers": {
-    "mcp-mqtt-plc": {
-      "command": "mcp-mqtt-plc"
-    }
-  }
-}
