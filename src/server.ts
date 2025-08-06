@@ -84,8 +84,8 @@ class MCPMqttPlcServer {
       return {
         tools: [
           {
-            name: 'get_plc_status',
-            description: 'Get the current status and data from the PLC',
+            name: 'search_mqtt_topics',
+            description: 'Search and discover all available MQTT topics with basic information',
             inputSchema: {
               type: 'object',
               properties: {},
@@ -93,31 +93,17 @@ class MCPMqttPlcServer {
             },
           },
           {
-            name: 'send_plc_command',
-            description: 'Send a command to the PLC',
+            name: 'get_topic_details',
+            description: 'Get detailed information about a specific MQTT topic',
             inputSchema: {
               type: 'object',
               properties: {
-                command: {
+                topicPattern: {
                   type: 'string',
-                  description: 'The command to send to the PLC',
+                  description: 'The topic name or pattern to get details for',
                 },
               },
-              required: ['command'],
-            },
-          },
-          {
-            name: 'query_plc_data',
-            description: 'Query specific PLC data points or ask questions about PLC status',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                query: {
-                  type: 'string',
-                  description: 'Natural language query about the PLC data',
-                },
-              },
-              required: ['query'],
+              required: ['topicPattern'],
             },
           },
         ] satisfies Tool[],
@@ -133,20 +119,14 @@ class MCPMqttPlcServer {
         await this.ensureMqttConnection();
 
         switch (name) {
-          case 'get_plc_status':
-            return await this.getPlcStatus();
+          case 'search_mqtt_topics':
+            return await this.searchMqttTopics();
 
-          case 'send_plc_command':
-            if (!args || typeof args.command !== 'string') {
-              throw new Error('Missing or invalid "command" argument for send_plc_command');
+          case 'get_topic_details':
+            if (!args || typeof args.topicPattern !== 'string') {
+              throw new Error('Missing or invalid "topicPattern" argument for get_topic_details');
             }
-            return await this.sendPlcCommand(args.command as string);
-
-          case 'query_plc_data':
-            if (!args || typeof args.query !== 'string') {
-              throw new Error('Missing or invalid "query" argument for query_plc_data');
-            }
-            return await this.queryPlcData(args.query as string);
+            return await this.getTopicDetails(args.topicPattern as string);
 
           default:
             throw new Error(`Unknown tool: ${name}`);
@@ -164,7 +144,7 @@ class MCPMqttPlcServer {
     });
   }
 
-  private async getPlcStatus() {
+  private async searchMqttTopics() {
     if (!this.mqttClient) {
       return {
         content: [
@@ -176,57 +156,53 @@ class MCPMqttPlcServer {
       };
     }
 
-    const latestPlcData = this.mqttClient.getLatestPlcData();
+    const topics = this.mqttClient.getAllTopics();
     
-    if (!latestPlcData) {
+    if (topics.length === 0) {
       return {
         content: [
           {
             type: 'text',
-            text: `No PLC data available yet. MQTT connection status: ${this.mqttClient.isClientConnected() ? 'Connected' : 'Disconnected'}\nBroker: ${this.mqttConfig.brokerUrl}\nData Topic: ${this.mqttConfig.topics.plcData}`,
+            text: `No MQTT topics discovered yet. MQTT connection status: ${this.mqttClient.isClientConnected() ? 'Connected' : 'Disconnected'}\nBroker: ${this.mqttConfig.brokerUrl}\n\nMake sure the MQTT broker is publishing data or wait a moment for topics to be discovered.`,
           },
         ],
       };
     }
+
+    // Create a summary of all topics
+    let topicSummary = `MQTT Topics Discovery (${topics.length} topics found):\n\n`;
+    
+    topics.forEach((topicInfo, index) => {
+      const timeDiff = Math.round((Date.now() - topicInfo.lastMessage.getTime()) / 1000);
+      let sampleDataPreview = '';
+      
+      try {
+        if (typeof topicInfo.sampleData === 'object') {
+          sampleDataPreview = Object.keys(topicInfo.sampleData).join(', ');
+        } else {
+          sampleDataPreview = String(topicInfo.sampleData).substring(0, 50);
+        }
+      } catch {
+        sampleDataPreview = 'Unable to preview';
+      }
+      
+      topicSummary += `${index + 1}. Topic: "${topicInfo.topic}"\n`;
+      topicSummary += `   - Messages received: ${topicInfo.messageCount}\n`;
+      topicSummary += `   - Last message: ${timeDiff}s ago\n`;
+      topicSummary += `   - Data preview: ${sampleDataPreview}\n\n`;
+    });
 
     return {
       content: [
         {
           type: 'text',
-          text: `Current PLC Status:\n${JSON.stringify(latestPlcData, null, 2)}`,
+          text: topicSummary,
         },
       ],
     };
   }
 
-  private async sendPlcCommand(command: string) {
-    if (!this.mqttClient) {
-      throw new Error('MQTT client not connected');
-    }
-
-    try {
-      await this.mqttClient.publishCommand(command);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Command "${command}" sent to PLC successfully via MQTT.`,
-          },
-        ],
-      };
-    } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Failed to send command "${command}": ${error instanceof Error ? error.message : String(error)}`,
-          },
-        ],
-      };
-    }
-  }
-
-  private async queryPlcData(query: string) {
+  private async getTopicDetails(topicPattern: string) {
     if (!this.mqttClient) {
       return {
         content: [
@@ -238,38 +214,52 @@ class MCPMqttPlcServer {
       };
     }
 
-    const latestPlcData = this.mqttClient.getLatestPlcData();
+    const topicDetails = this.mqttClient.getTopicDetails(topicPattern);
     
-    if (!latestPlcData) {
+    if (!topicDetails) {
       return {
         content: [
           {
             type: 'text',
-            text: `No PLC data available to query. MQTT connection status: ${this.mqttClient.isClientConnected() ? 'Connected' : 'Disconnected'}`,
+            text: `No topic found matching pattern: "${topicPattern}"\n\nUse the search_mqtt_topics method to discover available topics.`,
           },
         ],
       };
     }
 
-    // Simple query responses based on query
-    const queryLower = query.toLowerCase();
-    let response = '';
-
-    if (queryLower.includes('temperature')) {
-      response = `Current temperature: ${latestPlcData.temperature?.toFixed(1)}°F`;
-    } else if (queryLower.includes('motor')) {
-      response = `Motor status: ${latestPlcData.motorStatus} at ${latestPlcData.motorSpeed} RPM`;
-    } else if (queryLower.includes('pressure')) {
-      response = `System pressure: ${latestPlcData.pressure?.toFixed(1)} PSI`;
+    let detailsText = `Topic Details for: "${topicDetails.topic}"\n\n`;
+    
+    if (topicDetails.metadata && typeof topicDetails.metadata === 'object' && 'matchCount' in topicDetails.metadata) {
+      // Multiple topics matched
+      detailsText += `Found ${topicDetails.metadata.matchCount} matching topics:\n\n`;
+      if (Array.isArray(topicDetails.data)) {
+        topicDetails.data.forEach((item, index) => {
+          detailsText += `${index + 1}. Topic: "${item.topic}"\n`;
+          detailsText += `   Data: ${JSON.stringify(item.data, null, 2)}\n`;
+          if (item.metadata) {
+            detailsText += `   Messages: ${item.metadata.messageCount}\n`;
+            detailsText += `   Last updated: ${item.metadata.lastMessage}\n`;
+          }
+          detailsText += '\n';
+        });
+      }
     } else {
-      response = `System status: ${latestPlcData.systemStatus}`;
+      // Single topic
+      detailsText += `Current Data:\n${JSON.stringify(topicDetails.data, null, 2)}\n\n`;
+      
+      if (topicDetails.metadata) {
+        detailsText += `Metadata:\n`;
+        detailsText += `- Total messages received: ${topicDetails.metadata.messageCount}\n`;
+        detailsText += `- Last message time: ${topicDetails.metadata.lastMessage}\n`;
+        detailsText += `- Time since last message: ${Math.round((Date.now() - topicDetails.metadata.lastMessage.getTime()) / 1000)}s ago\n`;
+      }
     }
 
     return {
       content: [
         {
           type: 'text',
-          text: `Query: "${query}"\n\nAnswer: ${response}\n\nFull PLC Data:\n${JSON.stringify(latestPlcData, null, 2)}`,
+          text: detailsText,
         },
       ],
     };

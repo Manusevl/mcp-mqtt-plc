@@ -7,6 +7,8 @@ export class MqttPlcClient extends EventEmitter {
   private config: MqttConfig;
   private latestPlcData: PlcData | null = null;
   private isConnected: boolean = false;
+  private topicData: Map<string, any> = new Map();
+  private topicMetadata: Map<string, { lastMessage: Date; messageCount: number; sampleData: any }> = new Map();
 
   constructor(config: MqttConfig) {
     super();
@@ -59,6 +61,13 @@ export class MqttPlcClient extends EventEmitter {
       } else {
       }
     });
+
+    // Subscribe to all topics for discovery (using wildcard)
+    this.client.subscribe('#', (err) => {
+      if (err) {
+      } else {
+      }
+    });
   }
 
   private handleMessage(topic: string, payload: Buffer): void {
@@ -69,14 +78,33 @@ export class MqttPlcClient extends EventEmitter {
         timestamp: new Date()
       };
 
+      // Parse message data
+      let parsedData: any;
+      try {
+        parsedData = JSON.parse(payload.toString());
+      } catch {
+        // If JSON parsing fails, store as string
+        parsedData = payload.toString();
+      }
+
+      // Store topic data for discovery
+      this.topicData.set(topic, parsedData);
+
+      // Update topic metadata
+      const metadata = this.topicMetadata.get(topic) || { lastMessage: new Date(), messageCount: 0, sampleData: null };
+      metadata.lastMessage = new Date();
+      metadata.messageCount += 1;
+      metadata.sampleData = parsedData;
+      this.topicMetadata.set(topic, metadata);
+
+      // Handle specific PLC data topic
       if (topic === this.config.topics.plcData) {
-        // Parse PLC data from MQTT message
-        const plcData = JSON.parse(payload.toString()) as PlcData;
-        plcData.timestamp = new Date().toISOString();
-        
-        this.latestPlcData = plcData;
-        this.emit('plcDataReceived', plcData);
-        
+        if (typeof parsedData === 'object') {
+          const plcData = parsedData as PlcData;
+          plcData.timestamp = new Date().toISOString();
+          this.latestPlcData = plcData;
+          this.emit('plcDataReceived', plcData);
+        }
       }
     } catch (error) {
     }
@@ -115,6 +143,58 @@ export class MqttPlcClient extends EventEmitter {
 
   isClientConnected(): boolean {
     return this.isConnected;
+  }
+
+  getAllTopics(): Array<{ topic: string; lastMessage: Date; messageCount: number; sampleData: any }> {
+    const topics: Array<{ topic: string; lastMessage: Date; messageCount: number; sampleData: any }> = [];
+    
+    this.topicMetadata.forEach((metadata, topic) => {
+      topics.push({
+        topic,
+        lastMessage: metadata.lastMessage,
+        messageCount: metadata.messageCount,
+        sampleData: metadata.sampleData
+      });
+    });
+
+    // Sort by last message time (most recent first)
+    return topics.sort((a, b) => b.lastMessage.getTime() - a.lastMessage.getTime());
+  }
+
+  getTopicDetails(topicPattern: string): { topic: string; data: any; metadata: any } | null {
+    // If exact match exists, return it
+    if (this.topicData.has(topicPattern)) {
+      const metadata = this.topicMetadata.get(topicPattern);
+      return {
+        topic: topicPattern,
+        data: this.topicData.get(topicPattern),
+        metadata
+      };
+    }
+
+    // Otherwise, find topics that match the pattern (simple contains match)
+    const matchingTopics: Array<{ topic: string; data: any; metadata: any }> = [];
+    
+    this.topicData.forEach((data, topic) => {
+      if (topic.toLowerCase().includes(topicPattern.toLowerCase()) || 
+          topicPattern.toLowerCase().includes(topic.toLowerCase())) {
+        const metadata = this.topicMetadata.get(topic);
+        matchingTopics.push({ topic, data, metadata });
+      }
+    });
+
+    if (matchingTopics.length === 1) {
+      return matchingTopics[0];
+    } else if (matchingTopics.length > 1) {
+      // Return all matching topics as an array
+      return {
+        topic: `Multiple topics matching "${topicPattern}"`,
+        data: matchingTopics,
+        metadata: { matchCount: matchingTopics.length }
+      };
+    }
+
+    return null;
   }
 
   async disconnect(): Promise<void> {

@@ -28,3 +28,20 @@ export interface MqttMessage {
   payload: Buffer | string;
   timestamp: Date;
 }
+
+export interface TopicInfo {
+  topic: string;
+  lastMessage: Date;
+  messageCount: number;
+  sampleData: any;
+}
+
+export interface TopicDetails {
+  topic: string;
+  data: any;
+  metadata: {
+    lastMessage: Date;
+    messageCount: number;
+    sampleData: any;
+  };
+}
