@@ -178,6 +178,10 @@ local.env
 .env.test
 .env.production
 
+# MCP configuration with sensitive credentials
+.vscode/mcp.json
+
 # MQTT test files and logs
 mqtt-test.log
 plc-data.log
+.vscode/mcp.json
