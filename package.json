@@ -2,8 +2,33 @@
   "name": "mcp-mqtt-plc-server",
   "version": "0.1.0",
   "type": "module",
-  "description": "MCP server for MQTT-PLC communication",
+  "description": "MCP server for MQTT-PLC communication with real-time industrial PLC data collection and control",
   "main": "dist/server.js",
+  "bin": {
+    "mcp-mqtt-plc": "./dist/server.js"
+  },
+  "files": [
+    "dist/**/*",
+    "configs/",
+    "docs/",
+    "README.md",
+    "LICENSE",
+    "install.js"
+  ],
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "dotenv": "^17.2.1",
+    "mqtt": "^5.14.0"
+  },
+  "devDependencies": {
+    "@types/mqtt": "^0.0.34",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
   "scripts": {
     "build": "tsc -p build/tsconfig.json",
     "start": "node dist/server.js",
@@ -21,16 +46,36 @@
     "service:stop": "node scripts/mqtt-service.js stop",
     "service:status": "node scripts/mqtt-service.js status",
     "service:restart": "node scripts/mqtt-service.js restart",
-    "service:logs": "node scripts/mqtt-service.js logs"
+    "service:logs": "node scripts/mqtt-service.js logs",
+    "prepublishOnly": "npm run build && npm run test",
+    "publish:patch": "npm version patch && npm publish",
+    "publish:minor": "npm version minor && npm publish",
+    "publish:major": "npm version major && npm publish",
+    "pack": "npm run build && npm pack",
+    "postinstall": "node install.js"
   },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.5.0",
-    "dotenv": "^17.2.1",
-    "mqtt": "^5.14.0"
+  "engines": {
+    "node": ">=18.0.0"
   },
-  "devDependencies": {
-    "@types/mqtt": "^0.0.34",
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
-  }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Manusevl/mcp-mqtt-plc.git"
+  },
+  "keywords": [
+    "mcp",
+    "mqtt",
+    "plc",
+    "industrial",
+    "automation",
+    "model-context-protocol",
+    "iot",
+    "scada",
+    "real-time"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Manusevl/mcp-mqtt-plc/issues"
+  },
+  "homepage": "https://github.com/Manusevl/mcp-mqtt-plc#readme"
 }

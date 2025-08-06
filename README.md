@@ -67,6 +67,30 @@ MQTT_PLC_COMMANDS_TOPIC=plc/commands
 
 ## Installation & Quick Start
 
+### Option 1: NPM Installation (Recommended)
+
+1. **Install globally:**
+   ```bash
+   npm install -g mcp-mqtt-plc-server
+   ```
+
+2. **Start the server:**
+   ```bash
+   mcp-mqtt-plc
+   ```
+   The server will automatically create configuration files in `~/.mcp-mqtt-plc/` on first run.
+
+3. **Configure MQTT settings:**
+   Edit `~/.mcp-mqtt-plc/.env` with your MQTT broker details.
+
+### Option 2: Direct Usage (No Installation)
+
+```bash
+npx mcp-mqtt-plc-server
+```
+
+### Option 3: Development Setup
+
 1. **Clone and setup:**
    ```bash
    git clone https://github.com/yourusername/mcp-mqtt-plc-llm-server.git
@@ -149,6 +173,35 @@ The server supports sending the following PLC commands via MQTT:
 - Any custom command supported by your PLC system
 
 Ensure that the MQTT broker and PLC are properly configured and accessible.
+
+## Distribution & Publishing
+
+This package is available on npm as `mcp-mqtt-plc-server`.
+
+### For Package Maintainers
+
+To publish updates to npm:
+
+```bash
+# For bug fixes
+npm run publish:patch
+
+# For new features  
+npm run publish:minor
+
+# For breaking changes
+npm run publish:major
+```
+
+See `publish-guide.md` and `DISTRIBUTION.md` for detailed publishing instructions.
+
+### Package Contents
+
+The npm package includes:
+- Compiled JavaScript files (`dist/`)
+- Configuration templates (`configs/`)
+- Documentation (`docs/`)
+- Post-install setup script (`install.js`)
 
 ## Contributing
 
