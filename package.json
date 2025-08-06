@@ -1,6 +1,6 @@
 {
   "name": "mcp-mqtt-plc",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "MCP server for MQTT-PLC communication with real-time industrial PLC data collection and control",
   "main": "dist/server.js",
