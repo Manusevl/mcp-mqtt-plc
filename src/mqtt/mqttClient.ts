@@ -27,25 +27,21 @@ export class MqttPlcClient extends EventEmitter {
       this.client = mqtt.connect(this.config.brokerUrl, options);
 
       this.client.on('connect', () => {
-        console.log('Connected to MQTT broker');
         this.isConnected = true;
         this.subscribeToTopics();
         resolve();
       });
 
       this.client.on('error', (error) => {
-        console.error('MQTT connection error:', error);
         this.isConnected = false;
         reject(error);
       });
 
       this.client.on('offline', () => {
-        console.log('MQTT client offline');
         this.isConnected = false;
       });
 
       this.client.on('reconnect', () => {
-        console.log('MQTT client reconnecting...');
       });
 
       this.client.on('message', (topic, payload) => {
@@ -60,9 +56,7 @@ export class MqttPlcClient extends EventEmitter {
     // Subscribe to PLC data topic
     this.client.subscribe(this.config.topics.plcData, (err) => {
       if (err) {
-        console.error('Failed to subscribe to PLC data topic:', err);
       } else {
-        console.log(`Subscribed to PLC data topic: ${this.config.topics.plcData}`);
       }
     });
   }
@@ -83,10 +77,8 @@ export class MqttPlcClient extends EventEmitter {
         this.latestPlcData = plcData;
         this.emit('plcDataReceived', plcData);
         
-        console.log('Received PLC data:', plcData);
       }
     } catch (error) {
-      console.error('Error parsing MQTT message:', error);
     }
   }
 
@@ -108,10 +100,8 @@ export class MqttPlcClient extends EventEmitter {
         { qos: 1 },
         (error) => {
           if (error) {
-            console.error('Failed to publish command:', error);
             reject(error);
           } else {
-            console.log(`Published command: ${command}`);
             resolve();
           }
         }
@@ -131,7 +121,6 @@ export class MqttPlcClient extends EventEmitter {
     if (this.client) {
       return new Promise((resolve) => {
         this.client!.end(false, {}, () => {
-          console.log('Disconnected from MQTT broker');
           this.isConnected = false;
           resolve();
         });

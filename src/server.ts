@@ -14,15 +14,6 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-// Add logging for server lifecycle
-const debug = process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development';
-
-function log(message: string) {
-  if (debug) {
-    console.error(`[MCP Server] ${new Date().toISOString()}: ${message}`);
-  }
-}
-
 class MCPMqttPlcServer {
   private server: Server;
   private mqttClient: MqttPlcClient | null = null;
@@ -30,8 +21,6 @@ class MCPMqttPlcServer {
   private connectionPromise: Promise<void> | null = null;
 
   constructor() {
-    log('Initializing MCP MQTT PLC Server (lazy-loaded by client)');
-    
     // MQTT configuration
     this.mqttConfig = {
       brokerUrl: process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883',
@@ -81,13 +70,10 @@ class MCPMqttPlcServer {
     try {
       this.mqttClient = new MqttPlcClient(this.mqttConfig);
       await this.mqttClient.connect();
-      console.log('MQTT client connected on-demand');
       
       this.mqttClient.on('plcDataReceived', (data: PlcData) => {
-        console.log('PLC data updated:', data);
       });
     } catch (error) {
-      console.error('Failed to connect to MQTT broker:', error);
       throw error;
     }
   }
@@ -290,13 +276,14 @@ class MCPMqttPlcServer {
   }
 
   async run() {
-    log('Starting MCP server with stdio transport');
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    log('MCP server ready - waiting for client requests');
   }
 }
 
 // Start the server
 const server = new MCPMqttPlcServer();
-server.run().catch(console.error);
+server.run().catch(() => {
+  // Suppress error logging to avoid stdio interference
+  process.exit(1);
+});
