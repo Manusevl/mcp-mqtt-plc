@@ -7,7 +7,6 @@
   "scripts": {
     "build": "tsc -p build/tsconfig.json",
     "start": "node dist/server.js",
-    "start-lazy": "node dist/server-lazy.js",
     "dev": "tsc -p build/tsconfig.json && node dist/server.js",
     "watch": "tsc -p build/tsconfig.json --watch",
     "test-mqtt": "tsc -p build/tsconfig.json && node tests/test-mqtt.js",

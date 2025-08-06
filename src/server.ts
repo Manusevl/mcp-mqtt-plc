@@ -14,11 +14,12 @@ dotenv.config();
 
 class MCPMqttPlcServer {
   private server: Server;
-  private mqttClient: MqttPlcClient;
+  private mqttClient: MqttPlcClient | null = null;
   private mqttConfig: MqttConfig;
+  private connectionPromise: Promise<void> | null = null;
 
   constructor() {
-    // MQTT configuration - you can modify these values as needed
+    // MQTT configuration
     this.mqttConfig = {
       brokerUrl: process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883',
       clientId: process.env.MQTT_CLIENT_ID || 'mcp-plc-server',
@@ -29,8 +30,6 @@ class MCPMqttPlcServer {
         plcCommands: process.env.MQTT_PLC_COMMANDS_TOPIC || 'plc/commands'
       }
     };
-
-    this.mqttClient = new MqttPlcClient(this.mqttConfig);
 
     this.server = new Server(
       {
@@ -45,7 +44,39 @@ class MCPMqttPlcServer {
     );
     
     this.setupToolHandlers();
-    this.initializeMqttConnection();
+    // Note: NO immediate MQTT connection - using lazy loading
+  }
+
+  private async ensureMqttConnection(): Promise<void> {
+    if (this.mqttClient?.isClientConnected()) {
+      return; // Already connected
+    }
+
+    if (this.connectionPromise) {
+      return this.connectionPromise; // Connection in progress
+    }
+
+    this.connectionPromise = this.connectToMqtt();
+    try {
+      await this.connectionPromise;
+    } finally {
+      this.connectionPromise = null;
+    }
+  }
+
+  private async connectToMqtt(): Promise<void> {
+    try {
+      this.mqttClient = new MqttPlcClient(this.mqttConfig);
+      await this.mqttClient.connect();
+      console.log('MQTT client connected on-demand');
+      
+      this.mqttClient.on('plcDataReceived', (data: PlcData) => {
+        console.log('PLC data updated:', data);
+      });
+    } catch (error) {
+      console.error('Failed to connect to MQTT broker:', error);
+      throw error;
+    }
   }
 
   private setupToolHandlers() {
@@ -99,6 +130,9 @@ class MCPMqttPlcServer {
       const { name, arguments: args } = request.params;
 
       try {
+        // Connect to MQTT only when tools are actually used
+        await this.ensureMqttConnection();
+
         switch (name) {
           case 'get_plc_status':
             return await this.getPlcStatus();
@@ -131,23 +165,18 @@ class MCPMqttPlcServer {
     });
   }
 
-  private async initializeMqttConnection() {
-    try {
-      await this.mqttClient.connect();
-      console.log('MQTT client connected successfully');
-      
-      // Listen for PLC data updates
-      this.mqttClient.on('plcDataReceived', (data: PlcData) => {
-        console.log('PLC data updated:', data);
-      });
-      
-    } catch (error) {
-      console.error('Failed to connect to MQTT broker:', error);
-      console.log('Server will continue running but PLC data will not be available');
-    }
-  }
-
   private async getPlcStatus() {
+    if (!this.mqttClient) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: 'MQTT client not initialized. Connection will be established on first use.',
+          },
+        ],
+      };
+    }
+
     const latestPlcData = this.mqttClient.getLatestPlcData();
     
     if (!latestPlcData) {
@@ -155,7 +184,7 @@ class MCPMqttPlcServer {
         content: [
           {
             type: 'text',
-            text: `No PLC data available. MQTT connection status: ${this.mqttClient.isClientConnected() ? 'Connected' : 'Disconnected'}\nBroker: ${this.mqttConfig.brokerUrl}\nData Topic: ${this.mqttConfig.topics.plcData}`,
+            text: `No PLC data available yet. MQTT connection status: ${this.mqttClient.isClientConnected() ? 'Connected' : 'Disconnected'}\nBroker: ${this.mqttConfig.brokerUrl}\nData Topic: ${this.mqttConfig.topics.plcData}`,
           },
         ],
       };
@@ -172,10 +201,12 @@ class MCPMqttPlcServer {
   }
 
   private async sendPlcCommand(command: string) {
-    try {
-      // Send command via MQTT
-      await this.mqttClient.publishCommand(command);
+    if (!this.mqttClient) {
+      throw new Error('MQTT client not connected');
+    }
 
+    try {
+      await this.mqttClient.publishCommand(command);
       return {
         content: [
           {
@@ -197,6 +228,17 @@ class MCPMqttPlcServer {
   }
 
   private async queryPlcData(query: string) {
+    if (!this.mqttClient) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: 'MQTT client not initialized. Please try again.',
+          },
+        ],
+      };
+    }
+
     const latestPlcData = this.mqttClient.getLatestPlcData();
     
     if (!latestPlcData) {

@@ -2,7 +2,7 @@
   "servers": {
     "mcp-mqtt-plc": {
       "command": "node",
-      "args": ["C:\\projects\\X20MCPServer\\mcp-mqtt-plc-llm-server\\dist\\server-lazy.js"],
+      "args": ["C:\\projects\\X20MCPServer\\mcp-mqtt-plc-llm-server\\dist\\server.js"],
       "env": {
         "MQTT_BROKER_URL": "mqtt://192.168.1.1:1883",
         "MQTT_CLIENT_ID": "mcp-plc-server",
