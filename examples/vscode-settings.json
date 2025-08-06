@@ -1,0 +1,18 @@
+{
+  "_comment": "Example VS Code settings.json configuration for MCP MQTT PLC Server",
+  "_instructions": "Add this configuration to your VS Code settings.json file",
+  "_location": "File > Preferences > Settings > Open Settings (JSON)",
+  "mcp.servers": {
+    "mcp-mqtt-plc": {
+      "command": "mcp-mqtt-plc",
+      "args": [],
+      "env": {
+        "NODE_ENV": "production",
+        "MQTT_BROKER_URL": "mqtt://localhost:1883",
+        "MQTT_CLIENT_ID": "vscode-mcp-client",
+        "MQTT_PLC_DATA_TOPIC": "plc/data",
+        "MQTT_PLC_COMMANDS_TOPIC": "plc/commands"
+      }
+    }
+  }
+}

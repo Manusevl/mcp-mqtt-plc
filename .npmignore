@@ -4,10 +4,14 @@ build/
 tests/
 scripts/
 
-# Development files
+# Development documentation (keep user docs in docs/)
+docs/PUBLISH.md
+docs/READY.md
+
+# Configuration files (keep examples)
 .env
 .env.*
-!.env.example
+!examples/.env*
 
 # IDE files
 .vscode/

@@ -14,6 +14,15 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
+// Add logging for server lifecycle
+const debug = process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development';
+
+function log(message: string) {
+  if (debug) {
+    console.error(`[MCP Server] ${new Date().toISOString()}: ${message}`);
+  }
+}
+
 class MCPMqttPlcServer {
   private server: Server;
   private mqttClient: MqttPlcClient | null = null;
@@ -21,6 +30,8 @@ class MCPMqttPlcServer {
   private connectionPromise: Promise<void> | null = null;
 
   constructor() {
+    log('Initializing MCP MQTT PLC Server (lazy-loaded by client)');
+    
     // MQTT configuration
     this.mqttConfig = {
       brokerUrl: process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883',
@@ -279,8 +290,10 @@ class MCPMqttPlcServer {
   }
 
   async run() {
+    log('Starting MCP server with stdio transport');
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
+    log('MCP server ready - waiting for client requests');
   }
 }
 

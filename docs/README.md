@@ -1,57 +1,17 @@
 # Documentation Index
 
-This directory contains all documentation for the MCP MQTT PLC Server project.
+## User Documentation
+- **[INSTALLATION.md](INSTALLATION.md)** - Complete setup guide for VS Code and Claude Desktop
+  - Quick installation steps
+  - Configuration examples  
+  - Troubleshooting guide
 
-## 📚 Available Documentation
+## Development Documentation  
+- **[PUBLISH.md](PUBLISH.md)** - Publication checklist and process
+- **[READY.md](READY.md)** - Project completion summary
 
-### [📋 Testing Guide](TESTING_GUIDE.md)
-Comprehensive guide on how to test the MCP server with different clients and scenarios.
-
-### [🚀 Ready to Test](READY_TO_TEST.md)  
-Quick start guide showing the server is ready and how to connect from various clients.
-
-### [🔧 MCP Configuration Guide](MCP_CONFIG_GUIDE.md)
-Complete guide for configuring MCP clients (VS Code, Claude Desktop, etc.)
-
-### [📦 Deployment Guide](DEPLOYMENT_GUIDE.md)
-Choose between lazy loading and persistent service deployment options.
-
-## 📖 Additional Resources
-
-### Project Structure
-```
-├── src/                    # Source code
-│   ├── server.ts          # Main MCP server
-│   ├── mqtt/              # MQTT client implementation
-│   └── types/             # Type definitions
-├── tests/                 # Test files and utilities
-│   ├── test-mqtt.js       # MQTT connection test
-│   ├── complete-test.js   # Full MCP server test suite
-│   ├── mock-plc.js        # Mock PLC simulator
-│   └── ...                # Other test files
-├── docs/                  # Documentation (this directory)
-├── configs/               # Configuration files
-│   ├── .env.example       # Environment template
-│   ├── .env.test          # Test environment config
-│   └── claude-desktop-config.json  # Claude Desktop integration
-├── scripts/               # Utility scripts
-│   ├── setup.js           # Project setup script
-│   └── dev.js             # Development helper
-└── dist/                  # Built JavaScript files
-```
-
-### Quick Commands
-- `npm run setup` - Initialize project configuration
-- `npm run build` - Build TypeScript to JavaScript
-- `npm run test` - Run complete test suite
-- `npm run check` - Check project health
-- `npm run mock-plc` - Start mock PLC for testing
-
-### Environment Configuration
-The server uses environment variables for MQTT configuration. See `configs/.env.example` for all available options.
-
-### Client Integration
-- **Claude Desktop**: Use `configs/claude-desktop-config.json`
-- **Other MCP Clients**: Server runs on stdio, use standard MCP client libraries
-
-For detailed instructions, see the specific documentation files above.
+## Quick Links
+- [Main README](../README.md) - Project overview and features
+- [Examples](../examples/) - Configuration files and templates
+- [Source Code](../src/) - TypeScript source files
+- [Tests](../tests/) - Test files and utilities
