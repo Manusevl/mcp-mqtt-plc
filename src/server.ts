@@ -11,8 +11,8 @@ import { PlcData, MqttConfig } from './types/index.js';
 import { MqttPlcClient } from './mqtt/mqttClient.js';
 import dotenv from 'dotenv';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables (suppress promotional messages)
+dotenv.config({ quiet: true });
 
 class MCPMqttPlcServer {
   private server: Server;
