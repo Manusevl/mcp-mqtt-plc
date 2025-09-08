@@ -44,19 +44,20 @@ npm install -g mcp-mqtt-plc
 
 2. **Add to VS Code settings.json:**
    ```json
-   {
-     "mcp.servers": {
-       "mcp-mqtt-plc": {
-         "command": "mcp-mqtt-plc",
-         "args": [],
-         "env": {
-           "MQTT_BROKER_URL": "mqtt://your-broker:1883",
-           "MQTT_USERNAME": "your-username",
-           "MQTT_PASSWORD": "your-password"
-         }
-       }
-     }
-   }
+  {
+    "servers": {
+      "mcp-mqtt-plc": {
+        "command": "mcp-mqtt-plc",
+        "args": [],
+        "env": {
+          "MQTT_BROKER_URL": "yourMQTTURL",
+          "MQTT_CLIENT_ID": "vscode-mcp-client",
+          "MQTT_USERNAME": "youruser",
+          "MQTT_PASSWORD": "yourpassword",
+        }
+      }
+    }
+  }
    ```
 
 ### For Claude Desktop
@@ -68,19 +69,20 @@ npm install -g mcp-mqtt-plc
 
 2. **Configure Claude Desktop** (`%APPDATA%\Claude\claude_desktop_config.json`):
    ```json
-   {
-     "mcpServers": {
-       "mcp-mqtt-plc": {
-         "command": "mcp-mqtt-plc",
-         "args": [],
-         "env": {
-           "MQTT_BROKER_URL": "mqtt://your-broker:1883",
-           "MQTT_USERNAME": "your-username", 
-           "MQTT_PASSWORD": "your-password"
-         }
-       }
-     }
-   }
+  {
+    "mcpServers": {
+      "mcp-mqtt-plc": {
+        "command": "mcp-mqtt-plc",
+        "args": [],
+        "env": {
+          "MQTT_BROKER_URL": "yourURL",
+          "MQTT_CLIENT_ID": "vscode-mcp-client",
+          "MQTT_USERNAME": "youruser",
+          "MQTT_PASSWORD": "yourpassword"
+        }
+      }
+    }
+  }
    ```
 
 ## ⚙️ Configuration
